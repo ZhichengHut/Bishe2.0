@@ -20,9 +20,10 @@ private:
 	Tree **tree;
 
 public:
-	RandomForest(vector<Mat> img, vector<int> label, int w_w = 1, int t_n = 1, int s_n = 3000, int maxD=10, int minL=1, float minInfo=0);
+	RandomForest(vector<Mat> &img, vector<int> &label, int w_w = 1, int t_n = 1, int s_n = 3000, int maxD=10, int minL=1, float minInfo=0);
 	~RandomForest();
 	void train();
+	vector<int> predict(vector<Mat> test_img);
 	float predict(Mat test_img);
 };
 

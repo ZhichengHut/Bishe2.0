@@ -1,8 +1,10 @@
 #include "Node.h"
 
-Node::Node(vector<Mat> sample, vector<int> label, int w_w){	
-	imgList.assign(sample.begin(), sample.end());
-	imgLabel.assign(label.begin(), label.end());
+Node::Node(vector<Mat> &sample, vector<int> &label, int w_w){	
+	//imgList.assign(sample.begin(), sample.end());
+	//imgLabel.assign(label.begin(), label.end());
+	imgList = sample;
+	imgLabel = label;
 	sample_num = imgList.size();
 	LeafNode = false;
 	infoGain = 0;

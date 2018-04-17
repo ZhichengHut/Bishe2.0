@@ -12,6 +12,7 @@
 
 void classifier(RandomForest *RF, string test_fold, int width);
 
+void get_predict_result(RandomForest *RF, string test_fold);
 void get_predict_result(RandomForest *RF, string test_fold, int width, int sample_interval, float prob_threshold);
 
 float get_F1_score(string test_fold);

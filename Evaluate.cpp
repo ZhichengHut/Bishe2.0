@@ -1,7 +1,8 @@
 #include "Evaluate.h"
 
-void classifier(RandomForest *RF, string test_fold, int width){
-	char curDir[100];
+
+void get_predict_result(RandomForest *RF, string test_fold){
+    char curDir[100];
 
     for(int c=10; c<=12; c++){
 		list<Mat> imgList;
@@ -23,34 +24,43 @@ void classifier(RandomForest *RF, string test_fold, int width){
 					if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
 						if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "tif"){
 							//find the corresponding fold according to the image name
-							string cur_img = string(curDir) + "/" + string(entry->d_name);
-							cout << "current img: " << cur_img << endl;
+							string sub_curDIR = string(curDir) + "/" + string(entry->d_name).substr(0,2);
 							
-							Mat imgTest = imread(cur_img,0);
+							vector<Mat> imgTest;
+							vector<int> X,Y;
 
-							string csv_file = cur_img.substr(0, cur_img.length()-4) + "_predict.csv";							
-							vector<int> csvData = readCSV(csv_file);
+							DIR* subDIR;
+							struct dirent *sub_entry;
+							struct stat sub_s;
 
-							string csv_reslut = cur_img.substr(0, cur_img.length()-4) + "_detected.csv";
-							ofstream fout(csv_reslut);
+							stat(sub_curDIR.c_str(), &sub_s);
 
-							for(int i=0; i<csvData.size(); i+=2){
-								int x = csvData[i+1];
-								int y = csvData[i];
-
-								if(x < width + 1)
-									x = width + 1;
-								else if(x > imgTest.cols - width)
-									x = imgTest.cols - width;
-								
-								if(y < width + 1)
-									y = width + 1;
-								else if(y > imgTest.rows - width)
-									y = imgTest.rows - width;
-
-								if(RF->predict(imgTest((Rect(x-width,y-width,2*width,2*width)))) >= 0.5)
-									fout << y << "," << x << endl;
+							/////////extract the test image and their position
+							if((sub_s.st_mode & S_IFMT) == S_IFDIR ){
+								if(subDIR=opendir(sub_curDIR.c_str())){
+									while(sub_entry = readdir(subDIR)){
+										stat((sub_curDIR + string("/") + string(sub_entry->d_name)).c_str(),&sub_s);
+										if (((sub_s.st_mode & S_IFMT ) != S_IFDIR ) && ((sub_s.st_mode & S_IFMT) == S_IFREG )){
+											if(string(sub_entry->d_name).substr(string(sub_entry->d_name).find_last_of('.') + 1) == "png"){
+												Mat img_tmp = imread(sub_curDIR + string("/") + string(sub_entry->d_name), 1);
+												int x = atoi(string(sub_entry->d_name).substr(0,4).c_str());
+												int y = atoi(string(sub_entry->d_name).substr(5,4).c_str());
+												imgTest.push_back(img_tmp);
+												X.push_back(x);
+												Y.push_back(y);
+											}
+										}
+									}
+								}
 							}
+							vector<int> result = RF->predict(imgTest);
+							string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,2) + "_predict.csv";
+							ofstream fout(csv_name);
+							for(int i=0; i<result.size(); i++){
+								if(result[i] == 1)
+									fout << Y[i] << "," << X[i] << endl;
+							}
+							fout.close();
 						}
 					}
 				}
@@ -63,7 +73,6 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
     char curDir[100];
 
     for(int c=10; c<=12; c++){
-		list<Mat> imgList;
 		sprintf(curDir, "%s%02i", test_fold.c_str(), c);
 		cout << curDir << endl;
 
@@ -94,7 +103,6 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 									result.push_back(RF->predict(imgTest(Rect(x,y,2*width,2*width))));
 								}
 							}
-
 
 							int m = sqrt(result.size()*1.0);
 							//cout << "test size: " << result.size() << endl;
@@ -165,14 +173,15 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 							remove((curDir + string("/test.png")).c_str());*/
 
 							center.clear();
+							vector<Point2i>().swap(center);
 							result.clear();
+							vector<float>().swap(result);
 							fout.close();
 						}
 					}
 				}
 			}
 		}
-		imgList.clear();
 	}
 }
 

@@ -8,7 +8,7 @@ class Tree{
 private:
 	int window_width;
 	int maxDepth;
-	int NodeNum;
+	long NodeNum;
 	int minLeafSample;
 	float minInfoGain;
 
@@ -20,7 +20,7 @@ private:
 	Node **node;
 
 public:
-	Tree(vector<Mat> SP, vector<int> LB, int w_w = 1, int maxD=10, int minL=1, float minInfo=0);
+	Tree(vector<Mat> &SP, vector<int> &LB, int w_w = 1, int maxD=10, int minL=1, float minInfo=0);
 	~Tree();
 	void train();
 	int predict(Mat test_set);

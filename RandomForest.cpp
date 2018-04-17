@@ -1,11 +1,13 @@
 ﻿#include "RandomForest.h"
 
 
-RandomForest::RandomForest(vector<Mat> img, vector<int> label, int w_w, int t_n, int s_n, int maxD, int minL, float minInfo){
+RandomForest::RandomForest(vector<Mat> &img, vector<int> &label, int w_w, int t_n, int s_n, int maxD, int minL, float minInfo){
 	window_width = w_w;
 
-	imgData.assign(img.begin(), img.end());
-	LabelData.assign(label.begin(), label.end());
+	//imgData.assign(img.begin(), img.end());
+	//LabelData.assign(label.begin(), label.end());
+	imgData = img;
+	LabelData = label;
 	//cout << "sum: = " << accumulate(LabelData.begin(),LabelData.end(), 0) << endl;
 
 	tree_num = t_n;
@@ -62,6 +64,27 @@ void RandomForest::train(){
 		vector<int>().swap(lab);
 		tree[i]->train();
 	}
+}
+
+
+vector<int> RandomForest::predict(vector<Mat> test_img){
+	//cout << "Start to predict" << endl;
+	//cout << "test size = " << test_img.size() << endl;
+	vector<int> predict_result;
+	for(int i=0; i<test_img.size(); i++){
+		int vote = 0;
+		for(int j=0; j<tree_num; j++)
+			vote += tree[j]->predict(test_img[i]);
+
+		if(vote>0.5*tree_num)
+			predict_result.push_back(1);
+		else
+			predict_result.push_back(0);
+	}
+
+	//cout << "predict size = " << predict_result.size() << endl;
+
+	return predict_result;
 }
 
 float RandomForest::predict(Mat test_img){

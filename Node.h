@@ -36,7 +36,7 @@ private:
 	vector<int> rightLabel;
 
 public:
-	Node(vector<Mat> sample, vector<int>label, int w_w = 1);
+	Node(vector<Mat> &sample, vector<int> &label, int w_w = 1);
 	~Node();
 	inline vector<Mat> get_Left(){return leftImg;};
 	inline vector<Mat> get_Right(){return rightImg;};
